@@ -42,9 +42,7 @@ function clampChannel(value: number): number {
  * Legacy helper name kept for older code paths.
  * Internally just uses clampChannel so logic stays in one place.
  */
-function clampByte(x: number): number {
-  return clampChannel(x);
-}
+
 
 /**
  * Very simple brightness measure (average of RGB channels).
@@ -69,31 +67,6 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-/**
- * Fill a rectangle in the grid with a solid colour.
- * Rows [rowStart, rowEnd), cols [colStart, colEnd).
- */
-function fillRect(
-  grid: Grid,
-  rowStart: number,
-  rowEnd: number,
-  colStart: number,
-  colEnd: number,
-  color: RgbColor
-): void {
-  const rowCount = grid.length;
-  const colCount = grid[0]?.length ?? 0;
-
-  for (let r = rowStart; r < rowEnd; r++) {
-    if (r < 0 || r >= rowCount) continue;
-    for (let c = colStart; c < colEnd; c++) {
-      if (c < 0 || c >= colCount) continue;
-      const cell = grid[r][c];
-      cell.color = { ...color };
-      cell.age = 0;
-    }
-  }
-}
 
 /**
  * Paint a single cell, with bounds checks.
@@ -1113,7 +1086,6 @@ export function stepAvatar2(previous: Grid): Grid {
 
     const headHeight = Math.max(3, Math.round(avatarHeight * 0.18));
     const torsoHeight = Math.max(3, Math.round(avatarHeight * 0.28));
-    const legHeight = Math.max(3, avatarHeight - headHeight - torsoHeight);
 
     const headTop = topRow;
     const headBottom = headTop + headHeight;
