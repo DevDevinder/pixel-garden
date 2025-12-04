@@ -9,7 +9,7 @@ import { ControlsBar } from "./ControlsBar";
 export type Tool = "brush" | "eraser";
 
 const DEFAULT_SPEED_MS = 200;
-const CELL_SIZE = 16;
+const BASE_CELL_SIZE = 16;
 
 const DEFAULT_PALETTE = [
   "#f97316", // warm orange
@@ -18,6 +18,8 @@ const DEFAULT_PALETTE = [
   "#e879f9", // pink
   "#facc15", // yellow
   "#a855f7", // purple
+  "#000000", // black
+  "#ffffff", // white 
 ];
 
 /**
@@ -29,10 +31,6 @@ const DEFAULT_PALETTE = [
  * - timer / play state
  * - brush colour
  * - active tool (brush / eraser)
- *
- * Renders:
- * - ControlsBar (UI)
- * - GridCanvas (pixels)
  */
 export const PixelGarden: React.FC = () => {
   const [grid, setGrid] = useState<Grid>(() =>
@@ -44,8 +42,32 @@ export const PixelGarden: React.FC = () => {
   const [selectedHexColor, setSelectedHexColor] = useState(DEFAULT_PALETTE[0]);
   const [tool, setTool] = useState<Tool>("brush");
 
+  // Responsive cell size so the grid fits smaller screens
+  const [cellSize, setCellSize] = useState<number>(BASE_CELL_SIZE);
+
+  useEffect(() => {
+    const updateSize = () => {
+      // rough available width
+      const viewportWidth =
+        window.innerWidth || document.documentElement.clientWidth || 320;
+
+      // leave some padding
+      const maxCanvasWidth = viewportWidth - 32;
+      const idealCell = Math.floor(maxCanvasWidth / GRID_COLS);
+
+      // clamp a bit so it never gets *too* tiny or massive
+      const responsive = Math.max(8, Math.min(BASE_CELL_SIZE, idealCell));
+
+      setCellSize(responsive);
+    };
+
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
+
   /**
-   * One simulation step using the current rule.
+   * One simulated step using the current rule.
    */
   const stepSimulation = useCallback(() => {
     setGrid((previousGrid) => stepWithRule(growthRule, previousGrid));
@@ -59,7 +81,7 @@ export const PixelGarden: React.FC = () => {
   }, []);
 
   /**
-   * Sprinkle some random “seed” pixels using the current brush colour.
+   * Sprinkle some random “seed” pixels onto the canvas using the current brush colour.
    */
   const addRandomSeeds = useCallback(() => {
     setGrid((previousGrid) => {
@@ -82,11 +104,6 @@ export const PixelGarden: React.FC = () => {
 
   /**
    * Paint handler used by the canvas for both click and drag.
-   *
-   * - Brush: always overwrites the cell with the current colour.
-   * - Eraser: clears the cell.
-   *
-   * No toggling – you can just “draw” continuously.
    */
   const handlePaintCell = useCallback(
     (row: number, col: number) => {
@@ -147,15 +164,20 @@ export const PixelGarden: React.FC = () => {
         <div className="garden-canvas-wrapper">
           <GridCanvas
             grid={grid}
-            cellSize={CELL_SIZE}
+            cellSize={cellSize}
             onPaintCell={handlePaintCell}
           />
         </div>
       </div>
 
       <p className="garden-hint">
-        Hint: draw a few shapes with the brush, then hit “Random Seeds” and
-        “Play” to let the rules grow around your artwork.
+        Hint: Some modes need you to place an initial seed and others work
+        better with no seeds. Try mixing different rules and colours to see what
+        you can get!
+        <br />
+        Tip: using <strong>"avatar"</strong> after{" "}
+        <strong>"avatar2"</strong> or <strong>"magicPortrait2"</strong> can help
+        smooth out details and bring things to life.
       </p>
     </div>
   );

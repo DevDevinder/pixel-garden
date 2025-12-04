@@ -13,13 +13,23 @@ const App: React.FC = () => {
       <header className="app-header">
         <h1 className="app-title">PixelGarden</h1>
         <p className="app-subtitle">
-          Plant coloured seeds and watch them grow into generative pixel art.
+          Plant coloured seeds and watch them grow into generative pixel art. 
         </p>
       </header>
 
       <main className="app-main">
         <PixelGarden />
       </main>
+
+      <div className="app-root">
+      <a
+        href="https://github.com/DevDevinder/pixel-garden.git"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Source Code
+      </a>
+      </div>
 
       <footer className="app-footer">
         <span>Open source · MIT License</span>
